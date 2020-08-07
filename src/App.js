@@ -13,9 +13,11 @@ class App extends React.Component {
         playResultText: "",
         firstPlayer: "X",
         firstBtnDisabled: false,
+        isGameOver: false,
       };
     this.field = document.querySelector('.tic-tac-toe');
     this.timoutName = '';  
+    this.clearFieldTimeout = 8000;
     
     this.winnerLine = [
       [0, 1, 2],
@@ -36,23 +38,14 @@ class App extends React.Component {
       this.setState({count: 0});
       this.setState({playResultText: ""});
       this.setState({firstBtnDisabled: false});
+      this.setState({isGameOver: false});
     }
 
   autoClearField = () => {
     let timerId = setTimeout(() => {
       this.clearField();
-    }, 20000)
+    }, this.clearFieldTimeout)
     this.timoutName = timerId; 
-  }
-
-  onFieldClick = (evt) => {
-    evt.preventDefault();
-    console.lod('Остановить игру');
-  }
-
-  blockField = () => {
-    this.field.addEventListener('click', this.onFieldClick);
-    this.setState({playResultText:'Game is over! Start new game.'});
   }
 
   checkFirstPlayer = () => {
@@ -76,9 +69,9 @@ class App extends React.Component {
             } else {
               this.setState({oVictory: this.state.oVictory + 1});
             }
+            this.setState({isGameOver: true});
             
             this.autoClearField();
-            this.blockField();
           } else {
             if (count === 8) {
               this.setState({playResultText: 'Draw!!'})
@@ -88,8 +81,9 @@ class App extends React.Component {
       }
     }
 
-    clickHandler= event => {
-      this.setState({firstBtnDisabled: true});
+    clickHandler = event => {
+      if (!this.state.isGameOver) {
+        this.setState({firstBtnDisabled: true});
       if (this.timoutName != null) {
         clearTimeout(this.timoutName);
         this.timoutName = null;
@@ -109,6 +103,10 @@ class App extends React.Component {
         this.setState({playResultText:'Impossible action! Choose an other cell'})
       }
       this.isWinner(this.state.count);
+      } else {
+        this.setState({playResultText:'Game is over! Start new game.'});
+      }
+      
     }
 
     clearBtnHandler = () => {
@@ -117,6 +115,7 @@ class App extends React.Component {
 
     firstBtnHandler = () => {
       (this.state.firstPlayer === 'X') ? this.setState({firstPlayer: 'O'}) : this.setState({firstPlayer: 'X'});
+      
     }
 
       render(){
@@ -149,7 +148,7 @@ class App extends React.Component {
               <button className="clear-btn" type="button" onClick = {this.firstBtnHandler} disabled={this.state.firstBtnDisabled}>{this.state.firstPlayer} walks first</button>  
               <p className="btn-description">Click to change first player</p>
               <button className="clear-btn" type="button" onClick = {this.clearBtnHandler}>To Clear Field</button>
-              <p className="btn-description"> or the field  will clear after 10s after the end of the game</p>
+              <p className="btn-description"> or the field  will clear after {this.clearFieldTimeout / 1000}s after the end of the game</p>
             </div>
           )
       }
